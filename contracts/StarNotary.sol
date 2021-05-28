@@ -80,19 +80,27 @@ contract StarNotary is ERC721 {
     function exchangeStars(uint256 _tokenId1, uint256 _tokenId2) public {
         //1. Passing to star tokenId you will need to check if the owner of _tokenId1 or _tokenId2 is the sender
         require(
-            ownerOf(_tokenId1) == msg.sender,
+            ownerOf(_tokenId1) == msg.sender ||
+                ownerOf(_tokenId2) == msg.sender,
             "You need to own one of the stars to exchange it."
         );
+        // use an array such that index 0 will be callers token & 1 will be other user's token
+        uint256[2] memory tokenList;
+        tokenList = (ownerOf(_tokenId1) == msg.sender)
+            ? [uint256(_tokenId1), _tokenId2]
+            : [uint256(_tokenId2), _tokenId1];
+        // check if the other token is up for exchange
         require(
-            starsForExchange[_tokenId2] != address(0),
-            "Specify a token that is us for exchange."
+            starsForExchange[tokenList[1]] != address(0),
+            "Specify a token that is up for exchange."
         );
         //2. You don't have to check for the price of the token (star)
         //3. Get the owner of the two tokens (ownerOf(_tokenId1), ownerOf(_tokenId1)
         //4. Use _transferFrom function to exchange the tokens.
-        address otherUser = starsForExchange[_tokenId2];
-        _transferFrom(msg.sender, otherUser, _tokenId1);
-        _transferFrom(otherUser, msg.sender, _tokenId2);
+        address otherUser = starsForExchange[tokenList[1]];
+        _transferFrom(msg.sender, otherUser, tokenList[0]);
+        _transferFrom(otherUser, msg.sender, tokenList[1]);
+        delete starsForExchange[tokenList[1]];
     }
 
     // Implement Task 1 Transfer Stars
