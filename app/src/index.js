@@ -42,7 +42,10 @@ const App = {
     const { lookUptokenIdToStarInfo } = this.meta.methods
     const lookupId = document.getElementById('lookid').value
     const starName = await lookUptokenIdToStarInfo(lookupId).call()
-    App.setStatus(`The name associated with star id ${lookupId} is ${starName}`)
+    const message = starName
+      ? `The name associated with star id ${lookupId} is ${starName}`
+      : 'No star associated with that ID'
+    App.setStatus(message)
   },
 }
 
